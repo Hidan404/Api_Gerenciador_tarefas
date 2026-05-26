@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "api-gerenciador-tarefas"
+version = "0.1.0"
+description = "API de Gerenciamento de Tarefas com FastAPI"
+authors = ["Seu Nome <email@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.14,<3.15"
+fastapi = "^0.136.1"
+uvicorn = "^0.47.0"
+pydantic = "^2.5.0"
+python-multipart = "^0.0.6"
+starlette = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.3"
+pytest-cov = "^7.1.0"
+ruff = "^0.1.15"
+typos = "^1.46.2"
+httpx = "^0.28.1"
+taskipy = "^1.14.1"
+types-requests = "^2.33.0.20260518"
+pytest-mock = "^3.15.1"
+black = "^26.5.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.taskipy.tasks]
+run = "uvicorn src.api_gerenciador_tarefas.app:app --reload --port 8002"
+test = "pytest tests/ -v"
+cov = "pytest --cov=src --cov-report=term-missing -v"
+lint = "ruff check src/"
+format = "ruff format src/"
+typos = "typos src/"
+check = "task lint && task typos"
+all = "task check && task test && task cov"
+
