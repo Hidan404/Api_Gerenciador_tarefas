@@ -11,6 +11,7 @@ uvicorn = "^0.47.0"
 pydantic = {extras = ["email"], version = "^2.13.4"}
 python-multipart = "^0.0.6"
 starlette = "^1.0.1"
+sqlalchemy = "^2.0.50"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"
