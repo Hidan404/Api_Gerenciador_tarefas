@@ -31,3 +31,36 @@ def test_update_user():
 
     assert resposta.status_code == HTTPStatus.OK
     assert resposta.json() == {"id": 1, "user_name": "sabrina","email": "sabrina@gmail.com",}
+
+def test_update_user_not_found():
+    client = TestClient(app)
+    resposta = client.put("/users/999",
+        json={
+            "user_name": "sabrina",
+            "email": "sabrina@gmail.com",
+            "password": "sabrina",
+        },
+    
+    )
+
+    assert resposta.status_code == HTTPStatus.OK
+    assert resposta.json() == {"id": 1, "user_name": "sabrina","email": "sabrina@gmail.com",}
+
+def test_update_user_not_found():
+    client = TestClient(app)
+    resposta = client.put("/users/999",
+        json={
+            "user_name": "sabrina",
+            "email": "sabrina@gmail.com",
+            "password": "sabrina",
+        },
+    
+    )
+
+    assert resposta.status_code == HTTPStatus.NOT_FOUND
+
+def test_delete_user_not_found():
+    client = TestClient(app)
+    resposta = client.delete("/users/999")
+
+    assert resposta.status_code == HTTPStatus.NOT_FOUND    
