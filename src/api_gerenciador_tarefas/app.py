@@ -10,13 +10,12 @@ usuarios = []
 def users():
     return {"users": usuarios}
 
-@app.get("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
-def user(user_id: int):
+@app.get("/users/{users_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
+def users_id():
     for user in usuarios:
-        if user.id == user_id:
+        if user.id == users_id:
             return user
-
-    raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuario não encontrado")
+    return HTTPException(status_code=HTTPStatus.NOT_FOUND,detail="Usuario não encontrado")    
 
 @app.post("/users", status_code=HTTPStatus.CREATED, response_model=UserPublic)
 def create_user(user: User):

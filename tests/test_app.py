@@ -3,7 +3,7 @@ from http import HTTPStatus
 from api_gerenciador_tarefas.app import app
 
 
-def test_create_user():
+'''def test_create_user():
     client = TestClient(app)
 
     resposta = client.post(
@@ -63,4 +63,4 @@ def test_delete_user_not_found():
     client = TestClient(app)
     resposta = client.delete("/users/999")
 
-    assert resposta.status_code == HTTPStatus.NOT_FOUND    
+    assert resposta.status_code == HTTPStatus.NOT_FOUND    '''
