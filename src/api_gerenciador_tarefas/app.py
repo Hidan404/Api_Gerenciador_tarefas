@@ -1,45 +1,19 @@
-from fastapi import FastAPI, HTTPException
-from http import HTTPStatus
-from api_gerenciador_tarefas.models.user_schema import User, UserPublic, UserDB, UserList
+from fastapi import FastAPI
+import uvicorn
 
-app = FastAPI()
-usuarios = []
+app = FastAPI(
+    title="Gerenciador de Tarefas API", 
+    version="1.0.0", 
+    description="API para gerenciar tarefas, permitindo criar, ler, atualizar e excluir tarefas." 
+)
+
+@app.get("/")
+def read_root():
+    return {"message": "Bem-vindo ao Gerenciador de Tarefas API!"}
 
 
-@app.get("/usersList", status_code=HTTPStatus.OK, response_model=UserList)
-def users():
-    return {"users": usuarios}
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
-@app.get("/users/{users_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
-def users_id():
-    for user in usuarios:
-        if user.id == users_id:
-            return user
-    return HTTPException(status_code=HTTPStatus.NOT_FOUND,detail="Usuario não encontrado")    
 
-@app.post("/users", status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: User):
-    user_with_id = UserDB(
-        user_name=user.user_name,
-        email=user.email,
-        password=user.password,
-        id=len(usuarios) + 1,
-    )
-    usuarios.append(user_with_id)
-
-    return user_with_id
-
-@app.put("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
-def update_user(user_id: int ,user: User):
-    if  user_id not in [userio.id for userio in usuarios]:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuario não encontrado")
-
-    dados_novos = UserDB(
-        user_name=user.user_name,
-        email=user.email,
-        password=user.password,
-        id=user_id,
-    )
-    usuarios[user_id -1] = dados_novos
-    return dados_novos
 
