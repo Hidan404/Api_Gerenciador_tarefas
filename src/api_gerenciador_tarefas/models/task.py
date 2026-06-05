@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field
 from enum import Enum
 
 
@@ -9,13 +10,10 @@ class StatusEnum(Enum):
     COMPLETED = "completed"
 
 
-class Task(declarative_base()):
-    __tablename__ = "tasks"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    completed = Column(Boolean, default=False)
-    status = Column(String, default=StatusEnum.PENDING.value)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+class Task(BaseModel):
+    id:Optional[int] =None
+    title: str
+    description: str
+    status: Optional[StatusEnum]
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
