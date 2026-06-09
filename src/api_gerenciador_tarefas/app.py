@@ -1,26 +1,35 @@
 from fastapi import FastAPI
 from fastapi import status, HTTPException
+from api_gerenciador_tarefas.models.task import Task
 import uvicorn
 
 
-bandas = [
+from datetime import datetime
+
+tarefas = [
     {
         "id": 1,
-        "nome": "Dir en Grey",
-        "musica": "The Final",
-        "duracao": "4:45"
+        "title": "Estudar FastAPI",
+        "description": "Aprender a criar rotas e usar o Pydantic para validação.",
+        "status": "in_progress",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
     },
     {
         "id": 2,
-        "nome": "the GazettE",
-        "musica": "Filth in the Beauty",
-        "duracao": "4:32"
+        "title": "Configurar o Banco de Dados",
+        "description": "Criar as tabelas usando SQLAlchemy ou outro ORM.",
+        "status": "pending",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
     },
     {
         "id": 3,
-        "nome": "Versailles",
-        "musica": "Ascendead Master",
-        "duracao": "4:15"
+        "title": "Corrigir bug da URL do ViaCEP",
+        "description": "Adicionar o protocolo https:// na requisição do script.",
+        "status": "completed",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
     }
 ]
 
@@ -32,16 +41,57 @@ app = FastAPI(
 
 @app.get("/")
 def read_root():
-    return {"message": bandas}
+    return {"message": tarefas}
 
 @app.get("/{banda_id}",status_code=status.HTTP_200_OK)
 def banda_get(banda_id: int):
-    for i in bandas:
-        if i["id"] == banda_id:
-            print(i["id"])
-            return i
+    for t in tarefas:
+        if t["id"] == banda_id:
+            return t
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
+
+@app.post("/", status_code=status.HTTP_201_CREATED)
+def banda_post(task: Task):
+    if task.id is not None:
+        id_existentes = [t["id"] for t in tarefas]
+        print(id_existentes)
+
+        if task.id in id_existentes:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="ja existe ")
+        
+        nova_tarefa = task.model_dump()
+        tarefas.append(nova_tarefa)
+
+        return nova_tarefa
+
+
+@app.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
+def tarefa_update(id: int, task: Task):
+    for t in tarefas:
+        if t["id"] == id:
+            t["title"] = task.title
+            t["description"] = task.description
+            t["status"] = task.status.value
+            t["created_at"] = task.created_at.isoformat()
+            t["updated_a"] = task.updated_at.isoformat()
+
+            return t   
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
+    
+
+@app.delete("/{id}",status_code=status.HTTP_200_OK)
+def tarefas_delete(id: int,):
+    for t in tarefas:
+        if t["id"] == id:
+            tarefas.remove(t)
+            return {"detail": "Tarefa deletada"}
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
+
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
 
