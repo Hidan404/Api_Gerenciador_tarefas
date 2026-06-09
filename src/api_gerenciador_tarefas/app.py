@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi import status, HTTPException
+from fastapi.responses import JSONResponse
 from api_gerenciador_tarefas.models.task import Task
 import uvicorn
 
@@ -47,7 +48,7 @@ def read_root():
 def banda_get(banda_id: int):
     for t in tarefas:
         if t["id"] == banda_id:
-            return t
+            return JSONResponse(content=t, status_code=status.HTTP_200_OK)
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
 
@@ -63,7 +64,7 @@ def banda_post(task: Task):
         nova_tarefa = task.model_dump()
         tarefas.append(nova_tarefa)
 
-        return nova_tarefa
+        return JSONResponse(content={"message": "Tarefa criada com sucesso"}, status_code=status.HTTP_201_CREATED)
 
 
 @app.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
@@ -76,7 +77,7 @@ def tarefa_update(id: int, task: Task):
             t["created_at"] = task.created_at.isoformat()
             t["updated_a"] = task.updated_at.isoformat()
 
-            return t   
+            return JSONResponse(content={"message": "Tarefa atualizada com sucesso"}, status_code=status.HTTP_202_ACCEPTED)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
     
@@ -86,7 +87,7 @@ def tarefas_delete(id: int,):
     for t in tarefas:
         if t["id"] == id:
             tarefas.remove(t)
-            return {"detail": "Tarefa deletada"}
+            return JSONResponse(content={"message": "Tarefa deletada com sucesso"}, status_code=status.HTTP_200_OK)
     
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
 
