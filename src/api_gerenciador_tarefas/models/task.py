@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
 
@@ -17,6 +17,22 @@ class Task(BaseModel):
     status: Optional[StatusEnum]
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+
+    @field_validator('description')
+    def validar_descrition(cls, valor: str):
+        palavras = valor.split(" ")
+        if len(palavras) < 3:
+            raise ValueError("Descrição muito pequena")
+        return valor
+    
+    @model_validator(mode="after")
+    def validator_criado_na_data(self):
+        if self.updated_at < self.created_at:
+            raise ValueError("Data de atualizacao nao pode ser do perido inferior ao criado")
+        return self
+
+
+
 
 
 
