@@ -42,12 +42,12 @@ app = FastAPI(
 
 @app.get("/")
 def read_root():
-    return {"message": tarefas}
+    return JSONResponse(content=tarefas, status_code=status.HTTP_200_OK)
 
-@app.get("/{banda_id}",status_code=status.HTTP_200_OK)
-def banda_get(banda_id: int):
+@app.get("/{tarefa_id}",status_code=status.HTTP_200_OK)
+def tarefa_get(tarefa_id: int):
     for t in tarefas:
-        if t["id"] == banda_id:
+        if t["id"] == tarefa_id:
             return JSONResponse(content=t, status_code=status.HTTP_200_OK)
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
