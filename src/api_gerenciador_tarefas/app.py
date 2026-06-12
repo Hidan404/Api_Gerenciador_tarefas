@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi import status, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi import Response
 from api_gerenciador_tarefas.models.task import Task
+from typing import List, Optional, Dict
 import uvicorn
 
 
@@ -40,11 +42,11 @@ app = FastAPI(
     description="API para gerenciar tarefas, permitindo criar, ler, atualizar e excluir tarefas." 
 )
 
-@app.get("/")
+@app.get("/", description="Retorna a lista de todas as tarefas", status_code=status.HTTP_200_OK, summary="Listar Tarefas",response_model=List[Task])
 def read_root():
     return JSONResponse(content=tarefas, status_code=status.HTTP_200_OK)
 
-@app.get("/{tarefa_id}",status_code=status.HTTP_200_OK)
+@app.get("/{tarefa_id}",status_code=status.HTTP_200_OK, description="Retorna os detalhes de uma tarefa específica com base no ID fornecido", summary="Obter Detalhes da Tarefa", response_model=Task)
 def tarefa_get(tarefa_id: int):
     for t in tarefas:
         if t["id"] == tarefa_id:
@@ -52,7 +54,7 @@ def tarefa_get(tarefa_id: int):
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não encontrado")
 
-@app.post("/", status_code=status.HTTP_201_CREATED)
+@app.post("/", status_code=status.HTTP_201_CREATED, response_model=Task, description="Cria uma nova tarefa com os dados fornecidos", summary="Criar Tarefa")
 def banda_post(task: Task):
     if task.id is not None:
         id_existentes = [t["id"] for t in tarefas]
