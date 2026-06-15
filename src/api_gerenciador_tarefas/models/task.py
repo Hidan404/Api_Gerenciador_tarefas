@@ -1,38 +1,18 @@
+# src/api_gerenciador_tarefas/models/task.py
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from enum import Enum
+from sqlalchemy import String, Text, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+from api_gerenciador_tarefas.database.connection import Base
 
+class Task(Base):
+    __tablename__ = "tasks"
 
-class StatusEnum(Enum):
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-
-
-class Task(BaseModel):
-    id:Optional[int] =None
-    title: str
-    description: str
-    status: Optional[StatusEnum]
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
-
-    model_config = ConfigDict(from_attributes=True)
-
-    @field_validator('description')
-    def validar_descrition(cls, valor: str):
-        palavras = valor.split(" ")
-        if len(palavras) < 3:
-            raise ValueError("Descrição muito pequena")
-        return valor
-    
-    @model_validator(mode="after")
-    def validator_criado_na_data(self):
-        if self.updated_at < self.created_at:
-            raise ValueError("Data de atualizacao nao pode ser do perido inferior ao criado")
-        return self
-
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 

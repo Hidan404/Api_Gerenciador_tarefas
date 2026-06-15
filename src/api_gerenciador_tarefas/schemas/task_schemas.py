@@ -1,23 +1,33 @@
-from sqlalchemy import Column, Enum as SqlEnum, Integer, String, Boolean, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+# src/api_gerenciador_tarefas/schemas/task_schemas.py
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from enum import Enum
 
-Base = declarative_base()
+class StatusEnum(Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
 
-class TaskStatus(str, Enum):
+class TaskSchema(BaseModel):
+    id: Optional[int] = None
+    title: str
+    description: str
+    status: Optional[StatusEnum]
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
-    pending = "pending"
-    in_progress = "in_progress"
-    completed = "completed"
+    model_config = ConfigDict(from_attributes=True)
 
-class TaskSchema(Base):
-    __tablename__ = "tasks"
-
-    id: int = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    title: str = Column(String, index=True)
-    description: str = Column(String, index=True, nullable=False)
-    status = Column(SqlEnum(TaskStatus), index=True, nullable=False)
-    created_at: DateTime = Column(DateTime, index=True)
-    updated_at: DateTime = Column(DateTime, index=True)
-
-   
+    @field_validator('description')
+    def validar_descrition(cls, valor: str):
+        palavras = valor.split(" ")
+        if len(palavras) < 3:
+            raise ValueError("Descrição muito pequena")
+        return valor
+    
+    @model_validator(mode="after")
+    def validator_criado_na_data(self):
+        if self.updated_at < self.created_at:
+            raise ValueError("Data de atualizacao nao pode ser do perido inferior ao criado")
+        return self
