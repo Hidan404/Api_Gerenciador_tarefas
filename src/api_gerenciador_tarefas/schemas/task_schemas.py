@@ -20,4 +20,4 @@ class TaskSchema(Base):
     created_at: DateTime = Column(DateTime, index=True)
     updated_at: DateTime = Column(DateTime, index=True)
 
-    
+   

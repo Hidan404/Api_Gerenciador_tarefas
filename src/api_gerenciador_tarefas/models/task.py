@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from enum import Enum
 
 
@@ -17,6 +17,8 @@ class Task(BaseModel):
     status: Optional[StatusEnum]
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator('description')
     def validar_descrition(cls, valor: str):
