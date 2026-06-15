@@ -13,9 +13,11 @@ class TaskStatus(str, Enum):
 class TaskSchema(Base):
     __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    status = Column(SqlEnum(TaskStatus), index=True)
-    created_at = Column(DateTime, index=True)
-    updated_at = Column(DateTime, index=True)
+    id: int = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    title: str = Column(String, index=True)
+    description: str = Column(String, index=True, nullable=False)
+    status = Column(SqlEnum(TaskStatus), index=True, nullable=False)
+    created_at: DateTime = Column(DateTime, index=True)
+    updated_at: DateTime = Column(DateTime, index=True)
+
+    
