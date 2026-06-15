@@ -75,5 +75,23 @@ async def atualizar_tarefa(tarefa_id: int, tarefa: TaskSchema , db: AsyncSession
         # Dica: O PostgreSQL aceita o objeto datetime direto, não precisa do .isoformat()!
         tarefa_banco_atualizar.created_at = tarefa.created_at
         tarefa_banco_atualizar.updated_at = tarefa.updated_at
+
+        await db.commit()
+        await db.refresh(tarefa_banco_atualizar)
+
+        return tarefa_banco_atualizar
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontraa")    
+    
+
+@router.delete("/tarefas/{tarefa_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def deletar_tarefa(tarefa_id: int,db: AsyncSession = Depends(get_session)):
+    query = select(Task).filter(Task.id == tarefa_id)
+    resultado = await db.execute(query)
+    deletado_tarefa = resultado.scalar_one_or_none()
+
+    if deletado_tarefa is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Tarefa não pode ser deletada")  
+    else:
+        await db.delete(deletado_tarefa)
+        await db.commit()
