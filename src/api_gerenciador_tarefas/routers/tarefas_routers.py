@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from sqlalchemy import select
 from starlette import status
 from api_gerenciador_tarefas.models.task import Task
 from api_gerenciador_tarefas.schemas.task_schemas import TaskSchema
@@ -33,7 +34,46 @@ async def criar_tarefa(tarefa: TaskSchema, db: AsyncSession = Depends(get_sessio
         db.commit()
         return nova_tarefa
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro interno ao salvar no banco de dados")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                             detail="Erro interno ao salvar no banco de dados"
+                )
+
+
+@router.get("/tarefas",status_code=status.HTTP_200_OK,response_model=List[TaskSchema])
+async def ler_tarefas( db: AsyncSession = Depends(get_session)):
+    query = select(Task)
+    resultado= await db.execute(query)
+
+    return resultado.scalars().all()
 
 
 
+@router.get("/tarefas/{tarefa_id}",status_code=status.HTTP_200_OK, response_model=TaskSchema)
+async def ler_tarefas_id(tarefa_id: int, db: AsyncSession = Depends(get_session)):
+    try:
+        query = select(Task).filter(Task.id == tarefa_id)
+        resultado = await db.execute(query)
+
+        return resultado.scalars().all()
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontrada")
+
+
+@router.put("/tarefas/{tarefa_id}", status_code=status.HTTP_200_OK,response_model=TaskSchema)
+async def atualizar_tarefa(tarefa_id: int, tarefa: TaskSchema , db: AsyncSession = Depends(get_session)):
+    
+    query = select(Task).where(Task.id == tarefa_id)
+    resultado = await db.execute(query)
+
+    tarefa_banco_atualizar = resultado.scalar_one_or_none()
+
+    if tarefa_banco_atualizar:
+        tarefa_banco_atualizar.title = tarefa.title
+        tarefa_banco_atualizar.description = tarefa.description
+        tarefa_banco_atualizar.status = tarefa.status.value if tarefa.status else tarefa_banco_atualizar.status
+        
+        # Dica: O PostgreSQL aceita o objeto datetime direto, não precisa do .isoformat()!
+        tarefa_banco_atualizar.created_at = tarefa.created_at
+        tarefa_banco_atualizar.updated_at = tarefa.updated_at
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontraa")    
