@@ -3,6 +3,12 @@ from datetime import datetime
 from sqlalchemy import String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from api_gerenciador_tarefas.database.connection import Base
+from enum import Enum
+
+class StatusEnum(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -18,29 +24,3 @@ class Task(Base):
 
 
 
-tarefas = [
-    {
-        "id": 1,
-        "title": "Estudar FastAPI",
-        "description": "Aprender a criar rotas e usar o Pydantic para validação.",
-        "status": "in_progress",
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
-    },
-    {
-        "id": 2,
-        "title": "Configurar o Banco de Dados",
-        "description": "Criar as tabelas usando SQLAlchemy ou outro ORM.",
-        "status": "pending",
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
-    },
-    {
-        "id": 3,
-        "title": "Corrigir bug da URL do ViaCEP",
-        "description": "Adicionar o protocolo https:// na requisição do script.",
-        "status": "completed",
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
-    }
-]    

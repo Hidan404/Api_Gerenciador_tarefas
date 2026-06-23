@@ -13,7 +13,7 @@ class TaskSchema(BaseModel):
     id: Optional[int] = None
     title: str
     description: str
-    status: Optional[StatusEnum]
+    status: Optional[StatusEnum] = StatusEnum.PENDING
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -31,3 +31,9 @@ class TaskSchema(BaseModel):
         if self.updated_at < self.created_at:
             raise ValueError("Data de atualizacao nao pode ser do perido inferior ao criado")
         return self
+
+
+class TaskCreateSchema(BaseModel):
+    title: str
+    description: str
+    status: StatusEnum = StatusEnum.PENDING
