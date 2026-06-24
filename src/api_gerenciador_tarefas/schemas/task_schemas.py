@@ -37,3 +37,18 @@ class TaskCreateSchema(BaseModel):
     title: str
     description: str
     status: StatusEnum = StatusEnum.PENDING
+
+
+class TaskUpdateSchema(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    
+    @field_validator('description')
+    def validar_descrition(cls, valor: str):
+        palavras = valor.split(" ")
+        if len(palavras) < 3:
+            raise ValueError("Descrição muito pequena")
+        return valor
+    
+    
+    
