@@ -1,5 +1,5 @@
 # src/api_gerenciador_tarefas/schemas/task_schemas.py
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from enum import Enum
@@ -14,8 +14,8 @@ class TaskSchema(BaseModel):
     title: str
     description: str
     status: Optional[StatusEnum] = StatusEnum.PENDING
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,11 +26,13 @@ class TaskSchema(BaseModel):
             raise ValueError("Descrição muito pequena")
         return valor
     
-    @model_validator(mode="after")
-    def validator_criado_na_data(self):
-        if self.updated_at < self.created_at:
-            raise ValueError("Data de atualizacao nao pode ser do perido inferior ao criado")
-        return self
+    @field_validator('created_at', 'updated_at', mode='before')
+    def ensure_utc(cls, v):
+        if isinstance(v, datetime):
+            if v.tzinfo is None:
+                return v.replace(tzinfo=timezone.utc)
+            return v.astimezone(timezone.utc)
+        return v
 
 
 class TaskCreateSchema(BaseModel):

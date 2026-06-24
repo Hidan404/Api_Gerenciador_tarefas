@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.post("/tarefas",status_code=status.HTTP_201_CREATED, response_model=TaskSchema)
 async def criar_tarefa(tarefa: TaskSchema, db: AsyncSession = Depends(get_session)):
-    
+    try:
         nova_tarefa = Task(
             title=tarefa.title,
             description=tarefa.description,
@@ -25,7 +25,7 @@ async def criar_tarefa(tarefa: TaskSchema, db: AsyncSession = Depends(get_sessio
         await db.commit()
         await db.refresh(nova_tarefa)
         return nova_tarefa
-   
+    except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                              detail="Erro interno ao salvar no banco de dados"
                 )
@@ -58,15 +58,13 @@ async def atualizar_tarefa(tarefa_id: int, tarefa: TaskSchema , db: AsyncSession
     resultado = await db.execute(query)
 
     tarefa_banco_atualizar = resultado.scalar_one_or_none()
-    created_naive = tarefa.created_at.replace(tzinfo=None)
-    updated_naive = tarefa.updated_at.replace(tzinfo=None)
-
+    
     if tarefa_banco_atualizar:
         tarefa_banco_atualizar.title = tarefa.title
         tarefa_banco_atualizar.description = tarefa.description
         tarefa_banco_atualizar.status = tarefa.status.value if tarefa.status else tarefa_banco_atualizar.status
-        tarefa_banco_atualizar.created_at = created_naive
-        tarefa_banco_atualizar.updated_at = updated_naive
+        tarefa_banco_atualizar.created_at = tarefa.created_at
+        tarefa_banco_atualizar.updated_at = tarefa.updated_at
 
         await db.commit()
         await db.refresh(tarefa_banco_atualizar)
@@ -93,7 +91,7 @@ async def atualizar_tarefa(tarefa_id: int, tarefa_data: TaskUpdateSchema, db: As
 
     await db.commit()
     await db.refresh(tarefa)
-    db.close()
+    
     return tarefa
 
 
