@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette import status
 from api_gerenciador_tarefas.models.task import Task
-from api_gerenciador_tarefas.schemas.task_schemas import TaskSchema
+from api_gerenciador_tarefas.schemas.task_schemas import TaskSchema, TaskUpdateSchema
 from typing import List
 from datetime import datetime, timezone
 
@@ -75,6 +75,27 @@ async def atualizar_tarefa(tarefa_id: int, tarefa: TaskSchema , db: AsyncSession
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontraa")    
     
+
+@router.patch("/tarefas/{tarefa-id}", response_model=TaskSchema)
+async def atualizar_tarefa(tarefa_id: int, tarefa_data: TaskUpdateSchema, db: AsyncSession = Depends(get_session)):
+    query = select(Task).where(Task.id == tarefa_id)
+    resultado = await db.execute(query)
+    tarefa = resultado.scalar_one_or_none()
+
+    if not tarefa:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontrada")
+    
+    dados = tarefa_data.model_dump(exclude_unset=True)
+    for campo, valor in dados.items():
+        setattr(tarefa, campo, valor)
+
+    tarefa.updated_at = datetime.now(timezone.utc)    
+
+    await db.commit()
+    await db.refresh(tarefa)
+    db.close()
+    return tarefa
+
 
 @router.delete("/tarefas/{tarefa_id}",status_code=status.HTTP_204_NO_CONTENT)
 async def deletar_tarefa(tarefa_id: int,db: AsyncSession = Depends(get_session)):
